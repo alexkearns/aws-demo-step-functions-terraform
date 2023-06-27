@@ -1,0 +1,44 @@
+{
+  "Comment": "A state machine distributed map example.",
+  "StartAt": "Distributed map",
+  "States": {
+    "Distributed map": {
+      "Type": "Map",
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "DISTRIBUTED",
+          "ExecutionType": "STANDARD"
+        },
+        "StartAt": "Add one",
+        "States": {
+          "Add one": {
+            "Type": "Pass",
+            "Parameters": {
+              "outputNumber.$": "States.MathAdd($.inputNumber, 1)"
+            },
+            "ResultPath": "$",
+            "End": true
+          }
+        }
+      },
+      "ItemReader": {
+        "ReaderConfig": {
+          "InputType": "JSON"
+        },
+        "Resource": "arn:aws:states:::s3:getObject",
+        "Parameters": {
+            "Bucket": "${bucket}",
+            "Key": "${input_key}"
+        }
+      },
+      "ResultWriter": {
+        "Resource": "arn:aws:states:::s3:putObject",
+        "Parameters": {
+          "Bucket": "${bucket}",
+          "Prefix": "distributedMapOutput"
+        }
+      },
+      "End": true
+    }
+  }
+}
