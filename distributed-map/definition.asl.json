@@ -4,6 +4,7 @@
   "States": {
     "Distributed map": {
       "Type": "Map",
+      "MaxConcurrency": 10000,
       "ItemProcessor": {
         "ProcessorConfig": {
           "Mode": "DISTRIBUTED",

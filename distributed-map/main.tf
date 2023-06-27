@@ -1,23 +1,13 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-  }
-}
+data "aws_caller_identity" "current" {}
 
-# Configure the AWS Provider
-provider "aws" {
-  region = "eu-west-1"
+locals {
+  account_id = data.aws_caller_identity.current.account_id
 }
-
 
 resource "aws_s3_bucket" "bucket" {
-  bucket        = "twitch-demo-distributed-map-bucket"
+  bucket        = "demo-distributed-map-bucket-${local.account_id}"
   force_destroy = true
 }
-
 
 resource "aws_s3_bucket_public_access_block" "bucket_pab" {
   bucket = aws_s3_bucket.bucket.id
@@ -89,7 +79,7 @@ resource "aws_iam_policy_attachment" "state_machine_dist_map" {
 }
 
 resource "aws_iam_role" "state_machine_role" {
-  name               = "twitch-demo-state-machine-role"
+  name               = "demo-distributed-map-state-machine-role"
   assume_role_policy = data.aws_iam_policy_document.state_machine_role_trust_policy.json
   inline_policy {
     name   = "base-inline-permissions"
@@ -98,7 +88,7 @@ resource "aws_iam_role" "state_machine_role" {
 }
 
 resource "aws_sfn_state_machine" "sfn_state_machine" {
-  name     = "twitch-demo-state-machine"
+  name     = "demo-distributed-map-state-machine"
   role_arn = aws_iam_role.state_machine_role.arn
 
   definition = templatefile("./definition.asl.json", {
